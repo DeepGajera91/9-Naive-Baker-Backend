@@ -27,6 +27,10 @@ app.get("/",(req,res)=>{
     res.send("Helllo! Naive-Baker backend here!😀");
 });
 
+app.get("/hi",(req,res)=>{
+    res.send("Helllo! Deep here!😀");
+});
+
 app.use("/user",userRouter);
 app.use("/recipe",recipeRouter);
 app.use("/query",queryRouter);
