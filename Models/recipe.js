@@ -43,7 +43,7 @@ const recipeSchema = new Schema({
         type:String,
         trim:true
     },
-    chefUsername:{
+    chefname:{
         type:String,
         required:true
     },
