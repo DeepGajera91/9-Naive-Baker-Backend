@@ -24,7 +24,8 @@ router.post("/upload",auth,
     async (req,res) => {
         const errors = validationResult(req);
         if(!errors.isEmpty()){
-            return res.status(400).send({msg:errors.errors[0].msg});
+            //respone object
+            return res.status(400).send({msg:errors.errors[0].msg}); 
         }
 
         try{
@@ -32,6 +33,7 @@ router.post("/upload",auth,
             //chef
             const temp = await User.find(mongoose.Types.ObjectId(req.user._id));
             if(!temp){
+                //respone object
                 return res.status(400).json({msg:"User doesn't exists"});
             }
 
@@ -47,7 +49,7 @@ router.post("/upload",auth,
                 mealType:req.body.mealType,
                 preparationTime:req.body.preparationTime,
                 cuisine:req.body.cuisine,
-                chefUsername:user.username,
+                chefname:user.name,
                 chefID:user._id,
                 ingredients:req.body.ingredients,
                 numberOflike:0,
@@ -55,12 +57,13 @@ router.post("/upload",auth,
                 comments:[]
             });
             
-            const cook = await Chef.find({chef:{username:user.username}});
+            
+            const cook = await Chef.find({chef:{_id:user._id}});
             if(cook.length === 0){
                 const newChef = new Chef({
                     chef:{
                         name:user.name,
-                        username:user.username
+                        _id:user._id
                     }
                 });
                 const savedChef = await newChef.save();
@@ -79,18 +82,32 @@ router.post("/upload",auth,
             }
 
             const savedRecipe = await recipe.save();
+
+            //query user update rec[] savedRecipe._id 
+            
+            //respone object {ok,data,err}
+
             res.send(savedRecipe);
 
         }catch(err){
-            console.log(err.message);
-            res.status(400).send(err);
+            console.log(err);
+            const response = {
+                ok:false,
+                data:{
+                },
+                err:{
+                    status:400,
+                    msg:err.message    
+                }
+            }
+            res.status(400).send(response);
         }
 });
 
 
 //get all recipe  
 
-//recipe updtae
+//recipe update
 
 //delete recipe
 

@@ -24,17 +24,16 @@ if(process.env.NODE_ENV === "Development") {
 db();
 
 app.get("/",(req,res)=>{
-    res.send("Helllo! Naive-Baker backend here!😀");
+    const response = {
+        ok:true,
+        data:{
+            msg:"Naive-Baker Backend here!😀"   
+        },
+        err:{    
+        }
+    }
+    res.send(response);
 });
-
-app.get("/hi",(req,res)=>{
-    res.send("Helllo! Deep here!😀");
-});
-
-app.get("/bye",(req,res)=>{
-    res.send("Bye! Deep here!😀");
-});
-
 
 app.use("/user",userRouter);
 app.use("/recipe",recipeRouter);
