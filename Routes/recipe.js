@@ -90,7 +90,7 @@ router.post("/upload",auth,
 
 //get all recipe  
 
-//recipe updtae
+//recipe update
 
 //delete recipe
 
