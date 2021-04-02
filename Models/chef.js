@@ -4,7 +4,11 @@ const { Schema } = mongoose;
 const chefSchema = new Schema({
     chef:{
         name:{type:String,required:true,trim:true},
-        username:{type:String,required:true,trim:true,lowercase:true}
+        _id:{
+            type:Schema.Types.ObjectId,
+            ref:'User',
+            required:true
+        }
     }
 });
 

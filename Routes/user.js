@@ -16,29 +16,40 @@ router.post("/register",
         check("password","Please enter a valid password").isLength({
             min:8
         }),
-        check("username","Please enter a valid username").notEmpty(),
     ],
     async (req,res) => {
         const errors = validationResult(req);
         if(!errors.isEmpty()){
-            return res.status(400).send({msg:errors.errors[0].msg});
+            const response = {
+                ok:false,
+                data:{
+                },
+                err:{
+                    status:400,
+                    msg:errors.errors[0].msg     
+                }
+            }
+            return res.status(400).send(response);
         }
 
         try{
             
             let user = await User.findOne({email:req.body.email});
             if(user){
-                return res.status(400).json({msg:"User already exists"});
-            }
-
-            user = await User.findOne({username:req.body.username});
-            if(user){
-                return res.status(400).json({msg:"Entered username is not available"});
+                const response = {
+                    ok:false,
+                    data:{
+                    },
+                    err:{
+                        status:400,
+                        msg:"User already exist"    
+                    }
+                }
+                return res.status(400).send(response);
             }
 
             user = new User({
                 name:req.body.name,
-                username:req.body.username,
                 email:req.body.email,
                 password:req.body.password,
                 picURL:"",
@@ -56,11 +67,30 @@ router.post("/register",
             user.password = hashedPASS;
             
             const savedUser = await user.save();
-            res.send({user:user._id});
+            const response = {
+                    ok:true,
+                    data:{
+                        status:200,
+                        msg:"User has been registered",
+                        user:savedUser
+                    },
+                    err:{
+                    }
+                }
+            res.send(response);
 
         }catch(err){
-            console.log(err.message);
-            res.status(400).send(err);
+            const response = {
+                ok:false,
+                data:{
+                },
+                err:{
+                    status:400,
+                    msg:err.message   
+                }
+            }
+            console.log(response);
+            res.status(400).send(response);
         }
 });
 
@@ -74,27 +104,74 @@ router.post("/login",
     async (req,res) => {
         const errors = validationResult(req);
         if(!errors.isEmpty()){
-            return res.status(400).send({msg:errors.errors[0].msg});
+            const response = {
+                ok:false,
+                data:{
+                },
+                err:{
+                    status:400,
+                    msg:errors.errors[0].msg     
+                }
+            }
+            return res.status(400).send(response);
         }
 
         try{
             
             const user = await User.findOne({email:req.body.email});
             if(!user){
-                return res.status(400).json({msg:"User is not registered"});
+                const response = {
+                    ok:false,
+                    data:{
+                    },
+                    err:{
+                        status:400,
+                        msg:"User is not registered"    
+                    }
+                }
+                return res.status(400).send(response);
             }
 
             const validPASS = await bcrypt.compare(req.body.password,user.password);
             if(!validPASS){
-                return res.status(400).json({msg:"Password is not valid"});
+                const response = {
+                    ok:false,
+                    data:{
+                    },
+                    err:{
+                        status:400,
+                        msg:"Password is not valid"   
+                    }
+                }
+                return res.status(400).send(response);
             }
             
             const token = jwt.sign({_id:user._id},process.env.TOKEN_SECRET);
-            res.header('auth-token',token).send(token);
+            const response = {
+                ok:true,
+                data:{
+                    status:200,
+                    msg:"User has been logined",
+                    user:user,
+                    token:token
+                },
+                err:{
+                }
+            }
+            res.header('auth-token',token).send(response);
 
         }catch(err){
-            console.log(err.message);
-            res.status(400).send(err);
+            const response = {
+                ok:false,
+                data:{
+                },
+                err:{
+                    status:400,
+                    msg:err.message 
+                }
+            }
+            console.log(response);
+            res.status(400).send(response);
         }
 });
 
@@ -113,44 +190,82 @@ router.get("/detail",auth,async (req,res)=>{
         const tuser = await User.find(mongoose.Types.ObjectId(req.user._id));
         const user = tuser[0];
         const recipesbyuser = await Recipe.find({chefID:user._id});
-        user.recipe = recipesbyuser;
         let liked = [];
         if(user.lik !== undefined && user.lik !== null){
             for(let i=0;i<user.lik.length;i++){
-                liked.push(Recipe.find(mongoose.Types.ObjectId(user.lik[i]))[0]);
+                liked.push(await Recipe.find(mongoose.Types.ObjectId(user.lik[i]))[0]);
             }
         }
         let saved = [];
         if(user.sav !== undefined && user.sav !== null){
             for(let i=0;i<user.sav.length;i++){
-                saved.push(Recipe.find(mongoose.Types.ObjectId(user.sav[i]))[0]);
+                saved.push(await Recipe.find(mongoose.Types.ObjectId(user.sav[i]))[0]);
             }
         }
-        user.liked = liked;
-        user.saved = saved;
-        res.send(user);
+        user.liked = await liked;
+        user.saved = await saved;
+        const response = {
+            ok:true,
+            data:{
+                status:200,
+                msg:"details of the user",
+                user:user,
+                uploaded:recipesbyuser,
+                liked:user.liked,
+                saved:user.saved,
+            },
+            err:{
+            }
+        }
+        res.send(response);
     }catch(err){
         console.log(err);
-        res.status(400).send(err);
+        const response = {
+            ok:false,
+            data:{
+            },
+            err:{
+                status:400,
+                msg:err.message    
+            }
+        }
+        res.status(400).send(response);
     }
 });
 
-router.get("/profile/:username",async (req,res)=>{
+router.get("/profile/:_id",async (req,res)=>{
     try{
-        const cuser = await User.find({username:req.params.username});
+        const cuser = await User.find({_id:req.params._id});
         const currentuser = cuser[0];
         const recipesbyuser = await Recipe.find({chefID:currentuser._id});
-        res.send({
-            name:currentuser.name,
-            picURL:currentuser.picURL,
-            username:currentuser.username,
-            followercount:(currentuser.followers===null || currentuser.followers===undefined)?0:currentuser.followers.length,
-            followingcount:(currentuser.following===null || currentuser.following===undefined)?0:currentuser.following.length,
-            recipe:recipesbyuser,
-        });
+        const response = {
+            ok:true,
+            data:{
+                status:200,
+                msg:"details of the user",
+                name:currentuser.name,
+                picURL:currentuser.picURL,
+                username:currentuser.username,
+                followercount:(currentuser.followers===null || currentuser.followers===undefined)?0:currentuser.followers.length,
+                followingcount:(currentuser.following===null || currentuser.following===undefined)?0:currentuser.following.length,
+                recipe:recipesbyuser
+            },
+            err:{
+            }
+        }
+        res.send(response);
     }catch(err){
         console.log(err);
-        res.status(400).send(err);
+        const response = {
+            ok:false,
+            data:{
+            },
+            err:{
+                status:400,
+                msg:err.message    
+            }
+        }
+        res.status(400).send(response);
     }
 });
 
