@@ -151,7 +151,7 @@ router.post("/login",
                 ok:true,
                 data:{
                     status:200,
-                    msg:"User has been logined",
+                    msg:"User logged in",
                     user:user,
                     token:token
                 },
@@ -181,9 +181,28 @@ router.post("/login",
 
 //user forget password
 
-//delete user
 
-//get all user
+//**********GET ALL USERS*****************
+router.get("/getallusers",
+    async(req,res)=>{
+        try{
+            const temp = await User.find();
+                const response = {
+                    ok:true,
+                    data:{
+                        status:200,
+                        user:temp 
+                    },
+                    err:{
+                    }
+                }
+                return res.status(200).send(response);
+            
+        }catch(err){
+            res.status(400).send("Users not found");    // Send response JSON
+        }
+
+});
 
 router.get("/detail",auth,async (req,res)=>{
     try{

@@ -11,7 +11,28 @@ const Recipe = require('../Models/recipe.js');
 const Chef = require("../Models/chef.js");
 const Ingredients = require("../Models/ingredient.js");
 
-//post recipe upload
+
+router.get("/getrecipe",
+    async(req,res)=>{
+        try{
+            const temp = await Recipe.find();
+            
+                const response = {
+                    ok:true,
+                    data:{
+                        status:200,
+                        recipe:temp 
+                    },
+                    err:{
+                    }
+                }
+                return res.status(200).send(response);
+            
+        }catch(err){
+            res.status(400).send("Recipes not found");     // Send the JSON fromat
+        }
+
+});
 
 router.post("/upload",auth,
     [
@@ -24,8 +45,16 @@ router.post("/upload",auth,
     async (req,res) => {
         const errors = validationResult(req);
         if(!errors.isEmpty()){
-            //respone object
-            return res.status(400).send({msg:errors.errors[0].msg}); 
+            const response = {
+                ok:false,
+                data:{
+                },
+                err:{
+                    status:400,
+                    msg:errors.errors[0].msg      
+                }
+            }
+            return res.status(400).send(response); 
         }
 
         try{
@@ -33,12 +62,21 @@ router.post("/upload",auth,
             //chef
             const temp = await User.find(mongoose.Types.ObjectId(req.user._id));
             if(!temp){
-                //respone object
-                return res.status(400).json({msg:"User doesn't exists"});
+                const response = {
+                    ok:false,
+                    data:{
+                    },
+                    err:{
+                        status:400,
+                        msg:"User doesn't exist"   
+                    }
+                }
+                return res.status(400).send(response);
             }
 
 
             const user = temp[0];
+            
 
             recipe = new Recipe({
                 title:req.body.title,
@@ -82,12 +120,38 @@ router.post("/upload",auth,
             }
 
             const savedRecipe = await recipe.save();
-
             //query user update rec[] savedRecipe._id 
+            User.updateOne(
+                { _id: user._id},
+                { $push: { rec: savedRecipe._id } },
+                function(err, result) {
+                   if (err) {
+                     res.send(err);
+                   } else {
+                    const response = {
+                        ok:true,
+                        data:{
+                            status:200,
+                            data:user  
+                        },
+                        err:{
+                        }
+                    }
+                    return res.status(200).send(response);  
+                   }
+                }
+             ); 
             
-            //respone object {ok,data,err}
-
-            res.send(savedRecipe);
+            const response = {
+                ok:true,
+                data:{
+                    status:200,
+                    recipe:savedRecipe    
+                },
+                err:{
+                }
+            }
+            res.status(200).send(response);
 
         }catch(err){
             console.log(err);
@@ -104,14 +168,42 @@ router.post("/upload",auth,
         }
 });
 
+//********DELETE USER ********/
+router.delete("/delete",auth,async(req,res)=>{
+
+    const temp = await Recipe.find(mongoose.Types.ObjectId(req.body._id));
+
+    if(!temp){
+        const response = {
+            ok:false,
+            data:{
+            },
+            err:{
+                status:400,
+                msg:"Recipe doesn't exist"   
+            }
+        }
+        return res.status(400).send(response);
+    }
+    var myquery={_id: req.body._id };  
+    Recipe.remove(myquery);
+
+    const response = {
+        ok:true,
+        data:{
+            status:200,
+            msg:"Deletion successful" 
+        },
+        err:{
+        }
+    }
+    return res.status(200).send(response);
+});
 
 //get all recipe  
 
 //recipe update
 
 //delete recipe
-
-
-
 
 module.exports = router;
