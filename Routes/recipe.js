@@ -29,7 +29,16 @@ router.get("/getrecipe",
                 return res.status(200).send(response);
             
         }catch(err){
-            res.status(400).send("Recipes not found");     // Send the JSON fromat
+            const response = {
+                ok:false,
+                data:{
+                },
+                err:{
+                    status:400,
+                    msg:"Recipe not found"  
+                }
+            }
+            res.status(400).send(response);
         }
 
 });
