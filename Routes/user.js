@@ -9,6 +9,8 @@ const User = require('../Models/user.js');
 const auth = require('./verifyToken.js');
 const Recipe = require("../Models/recipe.js");
 
+
+//user register
 router.post("/register",
     [
         check("name","Please enter a valid name").notEmpty(),
@@ -94,6 +96,8 @@ router.post("/register",
         }
 });
 
+
+//user login
 router.post("/login",
     [
         check("email","Please enter a valid email").isEmail(),
@@ -175,15 +179,8 @@ router.post("/login",
         }
 });
 
-//update user 
-
-//user change password
-
-//user forget password
-
-
-//**********GET ALL USERS*****************
-router.get("/getallusers",
+//get all users
+router.get("/all",
     async(req,res)=>{
         try{
             const temp = await User.find();
@@ -191,6 +188,7 @@ router.get("/getallusers",
                     ok:true,
                     data:{
                         status:200,
+                        msg:"details of all users",
                         user:temp 
                     },
                     err:{
@@ -199,11 +197,20 @@ router.get("/getallusers",
                 return res.status(200).send(response);
             
         }catch(err){
-            res.status(400).send("Users not found");    // Send response JSON
+            const response = {
+                ok:false,
+                data:{
+                },
+                err:{
+                    status:400,
+                    msg:err.message 
+                }
+            }
+            res.status(400).send(response);
         }
-
 });
 
+//detail of user
 router.get("/detail",auth,async (req,res)=>{
     try{
         const tuser = await User.find(mongoose.Types.ObjectId(req.user._id));
@@ -252,6 +259,8 @@ router.get("/detail",auth,async (req,res)=>{
     }
 });
 
+
+//user profile
 router.get("/profile/:_id",async (req,res)=>{
     try{
         const cuser = await User.find({_id:req.params._id});

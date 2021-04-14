@@ -12,7 +12,8 @@ const Chef = require("../Models/chef.js");
 const Ingredients = require("../Models/ingredient.js");
 
 
-router.get("/getrecipe",
+//get recipe
+router.get("/all",
     async(req,res)=>{
         try{
             const temp = await Recipe.find();
@@ -35,7 +36,7 @@ router.get("/getrecipe",
                 },
                 err:{
                     status:400,
-                    msg:"Recipe not found"  
+                    msg:"Recipes not found"  
                 }
             }
             res.status(400).send(response);
@@ -43,6 +44,7 @@ router.get("/getrecipe",
 
 });
 
+//upload recipe
 router.post("/upload",auth,
     [
         check("title","Please enter a valid title").notEmpty(),
@@ -105,7 +107,7 @@ router.post("/upload",auth,
             });
             
             
-            const cook = await Chef.find({chef:{_id:user._id}});
+            const cook = await Chef.find({"chef._id" : user._id});
             if(cook.length === 0){
                 const newChef = new Chef({
                     chef:{
@@ -129,24 +131,16 @@ router.post("/upload",auth,
             }
 
             const savedRecipe = await recipe.save();
+
             //query user update rec[] savedRecipe._id 
             User.updateOne(
                 { _id: user._id},
                 { $push: { rec: savedRecipe._id } },
                 function(err, result) {
                    if (err) {
-                     res.send(err);
+                        console.log(err);
                    } else {
-                    const response = {
-                        ok:true,
-                        data:{
-                            status:200,
-                            data:user  
-                        },
-                        err:{
-                        }
-                    }
-                    return res.status(200).send(response);  
+                        console.log(result);
                    }
                 }
              ); 
@@ -177,7 +171,7 @@ router.post("/upload",auth,
         }
 });
 
-//********DELETE USER ********/
+//delete recipe 
 router.delete("/delete",auth,async(req,res)=>{
 
     const temp = await Recipe.find(mongoose.Types.ObjectId(req.body._id));
@@ -208,11 +202,5 @@ router.delete("/delete",auth,async(req,res)=>{
     }
     return res.status(200).send(response);
 });
-
-//get all recipe  
-
-//recipe update
-
-//delete recipe
 
 module.exports = router;
