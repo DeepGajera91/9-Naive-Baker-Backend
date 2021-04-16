@@ -8,8 +8,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../Models/user.js');
 const auth = require('./verifyToken.js');
 const Recipe = require("../Models/recipe.js");
-const sgmail = require('@sendgrid/mail');
-const API_KEY = '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';
+
 
 //user register
 router.post("/register",
@@ -298,96 +297,4 @@ router.get("/profile/:_id",async (req,res)=>{
     }
 });
 
-//forget password
-router.post("/forgetpassword",
-    [
-        check("email","Please enter a valid email").isEmail(),
-    ],
-    async (req,res) => {
-        const errors = validationResult(req);
-        if(!errors.isEmpty()){
-            const response = {
-                ok:false,
-                data:{
-                },
-                err:{
-                    status:400,
-                    msg:errors.errors[0].msg     
-                }
-            }
-            return res.status(400).send(response);
-        }
-        try{
-            
-            const user = await User.findOne({email:req.body.email});
-            if(!user){
-                const response = {
-                    ok:false,
-                    data:{
-                    },
-                    err:{
-                        status:400,
-                        msg:"User is not registered"    
-                    }
-                }
-                return res.status(400).send(response);
-            }
-
-            const token = jwt.sign({_id:user._id},process.env.TOKEN_SECRET);
-            sgmail.setApiKey(API_KEY);
-
-            const mailOptions = {
-                from: 'naivebaker001@gmail.com',
-                to: req.body.email,
-                subject: 'Reset password link',
-                html:`
-                <p>You have requested for resetting the password</p>
-                <h5>Click on this <a href = "http://localhost:5000/user/resetpassword/${token}">link</a> to reset your password</h5>
-                `
-            };
-            sgmail.send(mailOptions,function(err,data){
-                if(err){
-                    console.log('Error occured',err);
-                }
-                else{
-                    console.log('Email sent successfully');
-                }
-            });
-            const response = {
-                ok:true,
-                data:{
-                    status:200,
-                    msg:"Email to reset password is sent",
-                    user:user,
-                    token:token
-                },
-                err:{
-                }
-            }
-            res.send(response);
-
-        }catch(err){
-            const response = {
-                ok:false,
-                data:{
-                },
-                err:{
-                    status:400,
-                    msg:err.message 
-                }
-            }
-            console.log(response);
-            res.status(400).send(response);
-        }
-});
-
-//reset password
-//router.put("/resetpassword",async(req,res)=>{
-//    const password = req.body.password,
-//    const token = req.params;
-//    const decoded = jwt.verify(token,process.env.TOKEN_SECRET);
-//    const salt = await bcrypt.genSalt(10);
-//    const hashedPASS = await bcrypt.hash(req.body.password,salt);
-//    const UpdatedUser = await User.update
-//});
 module.exports = router;
