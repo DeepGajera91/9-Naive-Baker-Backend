@@ -203,4 +203,92 @@ router.delete("/delete",auth,async(req,res)=>{
     return res.status(200).send(response);
 });
 
+router.put("/like",auth,async(req,res)=>{
+    try{
+            
+        //chef
+        const temp = await User.find(mongoose.Types.ObjectId(req.user._id));
+        if(!temp){
+            const response = {
+                ok:false,
+                data:{
+                },
+                err:{
+                    status:400,
+                    msg:"User doesn't exist"   
+                }
+            }
+            return res.status(400).send(response);
+        }
+        const user = temp[0];
+        var isliked = false;
+        for(var a = 0;a < user.lik.length;a++){
+            var isrecipe = user.lik[a];
+            if(isrecipe._id.toString() == req.body._id){
+                isliked = true;
+                break;
+            }
+        }
+        if(isliked){
+            User.updateOne(
+                { _id: user._id},
+                { $pull: { lik: req.body._id } },
+                function(err, result) {
+                   if (err) {
+                        console.log(err);
+                   } else {
+                        console.log(result);
+                   }
+                }
+             ); 
+             const response = {
+                ok:true,
+                data:{
+                    status:200,
+                    msg:"User had already liked the recipe" 
+                },
+                err:{
+                }
+            }
+            res.status(200).send(response);
+        }
+        else{
+            User.updateOne(
+                { _id: user._id},
+                { $push: { lik: req.body._id } },
+                function(err, result) {
+                   if (err) {
+                        console.log(err);
+                   } else {
+                        console.log(result);
+                   }
+                }
+             ); 
+             const response = {
+                ok:true,
+                data:{
+                    status:200,
+                    msg:"User liked the recipe" 
+                },
+                err:{
+                }
+            }
+            res.status(200).send(response);
+        }
+    }catch(err){
+        console.log(err);
+        const response = {
+            ok:false,
+            data:{
+            },
+            err:{
+                status:400,
+                msg:err.message    
+            }
+        }
+        res.status(400).send(response);
+    }
+
+});
+
 module.exports = router;
