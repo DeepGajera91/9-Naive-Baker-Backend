@@ -6,6 +6,8 @@ const { check, validationResult } = require("express-validator");
 const User = require('../Models/user.js');
 const auth = require('./verifyToken.js');
 const Recipe = require("../Models/recipe.js");
+const Chef = require("../Models/chef.js");
+const Ingredients = require("../Models/ingredient.js");
 
 router.get("/search", async (req, res) => {
     try {
@@ -175,5 +177,74 @@ router.get("/search", async (req, res) => {
         res.status(400).send(response);
     }
 });
+
+//get chefs
+
+router.get("/chefs",async(req,res) => {
+    try{
+        const allchefs = await Chef.find();
+        let chefs = [];
+        for(let i=0;i<allchefs.length;i++){
+            chefs.push(allchefs[i].chef.name);
+        }
+        const response = {
+            ok:true,
+            data:{
+                status:200,
+                msg:"all the chefs",
+                chefs:chefs 
+            },
+            err:{
+            }
+        }
+        return res.status(200).send(response);
+    }catch(err){
+        console.log(err);
+        const response = {
+            ok: false,
+            data: {
+            },
+            err: {
+                status: 400,
+                msg: err.message
+            }
+        }
+        res.status(400).send(response);
+    }
+}) 
+
+//get ingredients
+router.get("/ingredients",async(req,res) => {
+    try{
+        const allings = await Ingredients.find();
+        let ings = [];
+        for(let i=0;i<allings.length;i++){
+            ings.push(allings[i].ingredient);
+        }
+        const response = {
+            ok:true,
+            data:{
+                status:200,
+                msg:"all the ingredients",
+                ingredients:ings 
+            },
+            err:{
+            }
+        }
+        return res.status(200).send(response);
+    }catch(err){
+        console.log(err);
+        const response = {
+            ok: false,
+            data: {
+            },
+            err: {
+                status: 400,
+                msg: err.message
+            }
+        }
+        res.status(400).send(response);
+    }
+})
 
 module.exports = router;
