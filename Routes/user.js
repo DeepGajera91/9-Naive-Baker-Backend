@@ -273,7 +273,6 @@ router.get("/profile/:_id",async (req,res)=>{
                 msg:"details of the user",
                 name:currentuser.name,
                 picURL:currentuser.picURL,
-                username:currentuser.username,
                 followercount:(currentuser.followers===null || currentuser.followers===undefined)?0:currentuser.followers.length,
                 followingcount:(currentuser.following===null || currentuser.following===undefined)?0:currentuser.following.length,
                 recipe:recipesbyuser

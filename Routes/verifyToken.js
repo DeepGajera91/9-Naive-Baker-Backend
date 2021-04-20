@@ -2,14 +2,34 @@ const jwt = require('jsonwebtoken');
 
 function auth(req,res,next){
     const token = req.header('auth-token');
-    if(!token) return res.status(401).send("Please Login again");
+    if(!token) {
+        const response = {
+            ok:false,
+            data:{
+            },
+            err:{
+                status:401,
+                msg:"Please Login again"     
+            }
+        }
+        return res.status(401).send(response);
+    }
 
     try{
         const verified = jwt.verify(token,process.env.TOKEN_SECRET);
         req.user = verified;
         next();
     } catch(err){
-        return res.status(400).json({msg:"Please Login again"});
+        const response = {
+            ok:false,
+            data:{
+            },
+            err:{
+                status:401,
+                msg:"Please Login again"     
+            }
+        }
+        return res.status(401).send(response);
     }
 }
 

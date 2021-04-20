@@ -22,6 +22,7 @@ router.get("/all",
                     ok:true,
                     data:{
                         status:200,
+                        msg:"all the recipes.",
                         recipe:temp 
                     },
                     err:{
@@ -149,6 +150,7 @@ router.post("/upload",auth,
                 ok:true,
                 data:{
                     status:200,
+                    msg:"recipe uploaded successfully",
                     recipe:savedRecipe    
                 },
                 err:{
