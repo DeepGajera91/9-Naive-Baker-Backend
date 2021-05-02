@@ -8,7 +8,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../Models/user.js');
 const auth = require('./verifyToken.js');
 const Recipe = require("../Models/recipe.js");
-
+const nodemailer = require('nodemailer');
 
 //user register
 router.post("/register",
@@ -294,6 +294,201 @@ router.get("/profile/:_id",async (req,res)=>{
         }
         res.status(400).send(response);
     }
+});
+
+//forget password
+router.post("/forgetpassword",
+    [
+        check("email","Please enter a valid email").isEmail(),
+    ],
+    async (req,res) => {
+        const errors = validationResult(req);
+        if(!errors.isEmpty()){
+            const response = {
+                ok:false,
+                data:{
+                },
+                err:{
+                    status:400,
+                    msg:errors.errors[0].msg     
+                }
+            }
+            return res.status(400).send(response);
+        }
+        try{
+            
+            const user = await User.findOne({email:req.body.email});
+            if(!user){
+                const response = {
+                    ok:false,
+                    data:{
+                    },
+                    err:{
+                        status:400,
+                        msg:"User is not registered"    
+                    }
+                }
+                return res.status(400).send(response);
+            }
+
+            //generate otp
+            let num = '1234567890';
+            let OTP = '';
+            for(let i = 0;i<4;i++){
+                OTP+= num[Math.floor(Math.random()*10)];
+            }
+            console.log(OTP);
+            User.updateOne(
+                { _id: user._id},
+                { $set: {OTP: OTP}},
+                function(err, result) {
+                   if (err) {
+                        console.log(err);
+                   } else {
+                        console.log(result);
+                   }
+                }
+             ); 
+            const token = jwt.sign({_id:user._id},process.env.TOKEN_SECRET);
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth:{
+                    user:'naivebaker001@gmail.com',
+                    pass:'@001naivebaker@'
+                }
+            });
+            const mailOptions = {
+                from: 'naivebaker001@gmail.com',
+                to: req.body.email,
+                subject: 'Reset password OTP',
+                html:`
+                <p>You have requested for resetting the password</p>
+                <h1>Your One Time Password is ${OTP}</h1>
+                `
+            };
+            transporter.sendMail(mailOptions,function(err,data){
+                if(err){
+                    console.log('Error occured',err);
+                }
+                else{
+                    console.log('Email sent successfully');
+                }
+            });
+            const response = {
+                ok:true,
+                data:{
+                    status:200,
+                    msg:"Email OPT sent",
+                    user:user,
+                    token:token
+                },
+                err:{
+                }
+            }
+            res.header('auth-token',token).send(response);
+
+        }catch(err){
+            const response = {
+                ok:false,
+                data:{
+                },
+                err:{
+                    status:400,
+                    msg:err.message 
+                }
+            }
+            console.log(response);
+            res.status(400).send(response);
+        }
+});
+
+//change password
+router.put("/resetpassword",[
+    check("OTP","Please enter the OTP").notEmpty(),
+    check("password","Please enter a valid password").isLength({
+        min:8
+    }),
+],auth,async(req,res)=>{
+    const errors = validationResult(req);
+        if(!errors.isEmpty()){
+            const response = {
+                ok:false,
+                data:{
+                },
+                err:{
+                    status:400,
+                    msg:errors.errors[0].msg     
+                }
+            }
+            return res.status(400).send(response);
+        }
+        try{  
+            const temp = await User.find(mongoose.Types.ObjectId(req.user._id));
+            if(!temp){
+                const response = {
+                    ok:false,
+                    data:{
+                    },
+                    err:{
+                        status:400,
+                        msg:"User doesn't exist"   
+                    }
+                }
+                return res.status(400).send(response);
+            }
+
+
+            const user = temp[0];
+            const OTP = req.body.OTP;
+            if(user.OTP !== OTP){
+                const response = {
+                    ok:false,
+                    data:{
+                    },
+                    err:{
+                        status:400,
+                        msg:"Invalid OTP"    
+                    }
+                }
+                return res.status(400).send(response);
+            }
+            const salt = await bcrypt.genSalt(10);
+            const hashedPASS = await bcrypt.hash(req.body.password,salt);
+            User.updateOne(
+                { _id: user._id},
+                { $set: {password: hashedPASS}},
+                function(err, result) {
+                   if (err) {
+                        console.log(err);
+                   } else {
+                        console.log(result);
+                   }
+                }
+             ); 
+             const response = {
+                ok: true,
+                data: {
+                    status: 200,
+                    msg: "password changed",
+                },
+                err: {
+                }
+            }
+            res.send(response);   
+        }catch(err){
+            const response = {
+                ok:false,
+                data:{
+                },
+                err:{
+                    status:400,
+                    msg:err.message 
+                }
+            }
+            console.log(response);
+            res.status(400).send(response);
+        }
+
 });
 
 module.exports = router;
