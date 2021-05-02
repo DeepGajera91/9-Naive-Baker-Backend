@@ -31,7 +31,7 @@ router.post("/register",
                     msg:errors.errors[0].msg     
                 }
             }
-            return res.status(400).send(response);
+            return res.send(response);
         }
 
         try{
@@ -47,7 +47,7 @@ router.post("/register",
                         msg:"User already exist"    
                     }
                 }
-                return res.status(400).send(response);
+                return res.send(response);
             }
 
             user = new User({
@@ -92,7 +92,7 @@ router.post("/register",
                 }
             }
             console.log(response);
-            res.status(400).send(response);
+            res.send(response);
         }
 });
 
@@ -117,7 +117,7 @@ router.post("/login",
                     msg:errors.errors[0].msg     
                 }
             }
-            return res.status(400).send(response);
+            return res.send(response);
         }
 
         try{
@@ -133,7 +133,7 @@ router.post("/login",
                         msg:"User is not registered"    
                     }
                 }
-                return res.status(400).send(response);
+                return res.send(response);
             }
 
             const validPASS = await bcrypt.compare(req.body.password,user.password);
@@ -147,7 +147,7 @@ router.post("/login",
                         msg:"Password is not valid"   
                     }
                 }
-                return res.status(400).send(response);
+                return res.send(response);
             }
             
             const token = jwt.sign({_id:user._id},process.env.TOKEN_SECRET);
@@ -175,7 +175,7 @@ router.post("/login",
                 }
             }
             console.log(response);
-            res.status(400).send(response);
+            res.send(response);
         }
 });
 
@@ -194,7 +194,7 @@ router.get("/all",
                     err:{
                     }
                 }
-                return res.status(200).send(response);
+                return res.send(response);
             
         }catch(err){
             const response = {
@@ -206,7 +206,7 @@ router.get("/all",
                     msg:err.message 
                 }
             }
-            res.status(400).send(response);
+            res.send(response);
         }
 });
 
@@ -255,7 +255,7 @@ router.get("/detail",auth,async (req,res)=>{
                 msg:err.message    
             }
         }
-        res.status(400).send(response);
+        res.send(response);
     }
 });
 
@@ -292,7 +292,7 @@ router.get("/profile/:_id",async (req,res)=>{
                 msg:err.message    
             }
         }
-        res.status(400).send(response);
+        res.send(response);
     }
 });
 
@@ -313,7 +313,7 @@ router.post("/forgetpassword",
                     msg:errors.errors[0].msg     
                 }
             }
-            return res.status(400).send(response);
+            return res.send(response);
         }
         try{
             
@@ -328,7 +328,7 @@ router.post("/forgetpassword",
                         msg:"User is not registered"    
                     }
                 }
-                return res.status(400).send(response);
+                return res.send(response);
             }
 
             //generate otp
@@ -398,7 +398,7 @@ router.post("/forgetpassword",
                 }
             }
             console.log(response);
-            res.status(400).send(response);
+            res.send(response);
         }
 });
 
@@ -420,7 +420,7 @@ router.put("/resetpassword",[
                     msg:errors.errors[0].msg     
                 }
             }
-            return res.status(400).send(response);
+            return res.send(response);
         }
         try{  
             const temp = await User.find(mongoose.Types.ObjectId(req.user._id));
@@ -434,7 +434,7 @@ router.put("/resetpassword",[
                         msg:"User doesn't exist"   
                     }
                 }
-                return res.status(400).send(response);
+                return res.send(response);
             }
 
 
@@ -450,7 +450,7 @@ router.put("/resetpassword",[
                         msg:"Invalid OTP"    
                     }
                 }
-                return res.status(400).send(response);
+                return res.send(response);
             }
             const salt = await bcrypt.genSalt(10);
             const hashedPASS = await bcrypt.hash(req.body.password,salt);
@@ -486,7 +486,7 @@ router.put("/resetpassword",[
                 }
             }
             console.log(response);
-            res.status(400).send(response);
+            res.send(response);
         }
 
 });

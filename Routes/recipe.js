@@ -188,7 +188,7 @@ router.delete("/delete",auth,async(req,res)=>{
                 msg:"Recipe doesn't exist"   
             }
         }
-        return res.status(400).send(response);
+        return res.send(response);
     }
     var myquery={_id: req.body._id };  
     Recipe.remove(myquery);
@@ -219,7 +219,7 @@ router.put("/like",auth,async(req,res)=>{
                     msg:"User doesn't exist"   
                 }
             }
-            return res.status(400).send(response);
+            return res.send(response);
         }
         const user = temp[0];
         var isliked = false;
@@ -287,7 +287,7 @@ router.put("/like",auth,async(req,res)=>{
                 msg:err.message    
             }
         }
-        res.status(400).send(response);
+        res.send(response);
     }
 
 });

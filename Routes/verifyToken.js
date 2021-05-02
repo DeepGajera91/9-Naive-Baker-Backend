@@ -12,7 +12,7 @@ function auth(req,res,next){
                 msg:"Please Login again"     
             }
         }
-        return res.status(401).send(response);
+        return res.send(response);
     }
 
     try{
@@ -29,7 +29,7 @@ function auth(req,res,next){
                 msg:"Please Login again"     
             }
         }
-        return res.status(401).send(response);
+        return res.send(response);
     }
 }
 

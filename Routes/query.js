@@ -174,7 +174,7 @@ router.get("/search", async (req, res) => {
                 msg: err.message
             }
         }
-        res.status(400).send(response);
+        res.send(response);
     }
 });
 
@@ -209,7 +209,7 @@ router.get("/chefs",async(req,res) => {
                 msg: err.message
             }
         }
-        res.status(400).send(response);
+        res.send(response);
     }
 }) 
 
@@ -226,7 +226,7 @@ router.get("/ingredients",async(req,res) => {
             data:{
                 status:200,
                 msg:"all the ingredients",
-                ingredients:ings 
+                ingredients:ings
             },
             err:{
             }
@@ -243,7 +243,7 @@ router.get("/ingredients",async(req,res) => {
                 msg: err.message
             }
         }
-        res.status(400).send(response);
+        res.send(response);
     }
 })
 
