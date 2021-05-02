@@ -22,6 +22,10 @@ const userSchema = new Schema({
         type:String,
         trim:true
     },
+    OTP:{
+        type:String,
+        default: ''
+    },
     following:[{ type: Schema.Types.ObjectId, ref: 'User' }],
     followers:[{ type: Schema.Types.ObjectId, ref: 'User' }],
     rec:[{ type: Schema.Types.ObjectId, ref: 'Recipe' }],
