@@ -9,15 +9,15 @@ const Recipe = require("../Models/recipe.js");
 const Chef = require("../Models/chef.js");
 const Ingredients = require("../Models/ingredient.js");
 
-router.get("/search", async (req, res) => {
+router.post("/search", async (req, res) => {
     try {
         let sz = 0;
-        if (req.body.ingredients.length !== 0 && req.body.ingredients !== undefined) sz++;
-        if (req.body.chefnames.length !== 0 && req.body.chefnames !== undefined) sz++;
-        if (req.body.mealTypes.length !== 0 && req.body.mealTypes !== undefined) sz++;
-        if (req.body.categorys.length !== 0 && req.body.categorys !== undefined) sz++;
+        if (req.body.ingredients !== undefined && req.body.ingredients.length !== 0) sz++;
+        if (req.body.chefnames !== undefined && req.body.chefnames.length !== 0) sz++;
+        if (req.body.mealTypes !== undefined && req.body.mealTypes.length !== 0) sz++;
+        if (req.body.categorys !== undefined && req.body.categorys.length !== 0) sz++;
         if (req.body.preparationTime !== 0) sz++;
-        if (req.body.cuisines.length !== 0 && req.body.cuisines !== undefined) sz++;
+        if (req.body.cuisines !== undefined && req.body.cuisines.length !== 0) sz++;
         if (sz === 0) {
             const recipes = await Recipe.find();
             const response = {
@@ -36,7 +36,7 @@ router.get("/search", async (req, res) => {
         else {
             let query = "";
             query += "{\"$and\" : ["
-            if (req.body.ingredients.length !== 0 && req.body.ingredients !== undefined) {
+            if (req.body.ingredients !== undefined && req.body.ingredients.length !== 0) {
                 console.log(req.body.ingredients);
                 sz--;
                 query += "{\"ingredients.ingname\"";
@@ -57,7 +57,7 @@ router.get("/search", async (req, res) => {
             }
 
             //chefname
-            if (req.body.chefnames.length !== 0 && req.body.chefnames !== undefined) {
+            if (req.body.chefnames !== undefined && req.body.chefnames.length !== 0) {
                 sz--;
                 query += "{\"chefname\"";
                 query += " : {\"$in\" : ["
@@ -77,7 +77,7 @@ router.get("/search", async (req, res) => {
             }
 
             //mealtype
-            if (req.body.mealTypes.length !== 0 && req.body.mealTypes !== undefined) {
+            if (req.body.mealTypes !== undefined && req.body.mealTypes.length !== 0) {
                 sz--;
                 query += "{\"mealType\"";
                 query += " : {\"$in\" : ["
@@ -97,7 +97,7 @@ router.get("/search", async (req, res) => {
             }
 
             //categorys
-            if (req.body.categorys.length !== 0 && req.body.categorys !== undefined) {
+            if (req.body.categorys !== undefined && req.body.categorys.length !== 0) {
                 sz--;
                 query += "{\"category\"";
                 query += " : {\"$in\" : ["
@@ -128,7 +128,7 @@ router.get("/search", async (req, res) => {
                 }
             }
             //cuisines
-            if (req.body.cuisines.length !== 0 && req.body.cuisines !== undefined) {
+            if (req.body.cuisines !== undefined && req.body.cuisines.length !== 0 ) {
                 sz--;
                 query += "{\"cuisine\"";
                 query += " : {\"$in\" : ["
