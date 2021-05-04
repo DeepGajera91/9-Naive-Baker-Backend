@@ -349,7 +349,7 @@ router.post("/forgetpassword",
                    }
                 }
              ); 
-            const token = jwt.sign({_id:user._id},process.env.TOKEN_SECRET);
+
             const transporter = nodemailer.createTransport({
                 service: 'gmail',
                 auth:{
@@ -380,12 +380,11 @@ router.post("/forgetpassword",
                     status:200,
                     msg:"Email OPT sent",
                     user:user,
-                    token:token
                 },
                 err:{
                 }
             }
-            res.header('auth-token',token).send(response);
+            res.send(response);
 
         }catch(err){
             const response = {
@@ -403,12 +402,13 @@ router.post("/forgetpassword",
 });
 
 //change password
-router.put("/resetpassword",[
+router.post("/resetpassword",[
+    check("email","Please enter a valid email").isEmail(),
     check("OTP","Please enter the OTP").notEmpty(),
     check("password","Please enter a valid password").isLength({
         min:8
     }),
-],auth,async(req,res)=>{
+],async(req,res)=>{
     const errors = validationResult(req);
         if(!errors.isEmpty()){
             const response = {
@@ -423,7 +423,7 @@ router.put("/resetpassword",[
             return res.send(response);
         }
         try{  
-            const temp = await User.find(mongoose.Types.ObjectId(req.user._id));
+            const temp = await User.find({email:req.body.email});
             if(!temp){
                 const response = {
                     ok:false,
