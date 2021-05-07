@@ -225,7 +225,7 @@ router.put("/like",auth,async(req,res)=>{
         var isliked = false;
         for(var a = 0;a < user.lik.length;a++){
             var isrecipe = user.lik[a];
-            if(isrecipe._id.toString() == req.body._id){
+            if(isrecipe._id.toString() === req.body._id){
                 isliked = true;
                 break;
             }
@@ -270,6 +270,93 @@ router.put("/like",auth,async(req,res)=>{
                 data:{
                     status:200,
                     msg:"User liked the recipe" 
+                },
+                err:{
+                }
+            }
+            res.status(200).send(response);
+        }
+    }catch(err){
+        console.log(err);
+        const response = {
+            ok:false,
+            data:{
+            },
+            err:{
+                status:400,
+                msg:err.message    
+            }
+        }
+        res.send(response);
+    }
+
+});
+
+//save recpie
+router.put("/save",auth,async(req,res)=>{
+    try{
+        const temp = await User.find(mongoose.Types.ObjectId(req.user._id));
+        if(!temp){
+            const response = {
+                ok:false,
+                data:{
+                },
+                err:{
+                    status:400,
+                    msg:"User doesn't exist"   
+                }
+            }
+            return res.send(response);
+        }
+        const user = temp[0];
+        var issaved = false;
+        for(var a = 0;a < user.sav.length;a++){
+            var isrecipe = user.sav[a];
+            if(isrecipe._id.toString() === req.body._id){
+                issaved = true;
+                break;
+            }
+        }
+        if(issaved){
+            User.updateOne(
+                { _id: user._id},
+                { $pull: { sav: req.body._id } },
+                function(err, result) {
+                   if (err) {
+                        console.log(err);
+                   } else {
+                        console.log(result);
+                   }
+                }
+             ); 
+             const response = {
+                ok:true,
+                data:{
+                    status:200,
+                    msg:"User had already saved the recipe" 
+                },
+                err:{
+                }
+            }
+            res.status(200).send(response);
+        }
+        else{
+            User.updateOne(
+                { _id: user._id},
+                { $push: { sav: req.body._id } },
+                function(err, result) {
+                   if (err) {
+                        console.log(err);
+                   } else {
+                        console.log(result);
+                   }
+                }
+             ); 
+             const response = {
+                ok:true,
+                data:{
+                    status:200,
+                    msg:"User saved the recipe" 
                 },
                 err:{
                 }
