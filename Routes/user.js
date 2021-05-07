@@ -217,19 +217,20 @@ router.get("/detail",auth,async (req,res)=>{
         const user = tuser[0];
         const recipesbyuser = await Recipe.find({chefID:user._id});
         let liked = [];
+        console.log(user.lik.length,user.sav.length);
         if(user.lik !== undefined && user.lik !== null){
             for(let i=0;i<user.lik.length;i++){
-                liked.push(await Recipe.find(mongoose.Types.ObjectId(user.lik[i]))[0]);
+                let lp = await Recipe.find(mongoose.Types.ObjectId(user.lik[i]));
+                liked.push(lp[0]);
             }
         }
         let saved = [];
         if(user.sav !== undefined && user.sav !== null){
             for(let i=0;i<user.sav.length;i++){
-                saved.push(await Recipe.find(mongoose.Types.ObjectId(user.sav[i]))[0]);
+                let sp = await Recipe.find(mongoose.Types.ObjectId(user.sav[i]));
+                saved.push(sp[0]);
             }
         }
-        user.liked = await liked;
-        user.saved = await saved;
         const response = {
             ok:true,
             data:{
@@ -237,8 +238,8 @@ router.get("/detail",auth,async (req,res)=>{
                 msg:"details of the user",
                 user:user,
                 uploaded:recipesbyuser,
-                liked:user.liked,
-                saved:user.saved,
+                liked:liked,
+                saved:saved,
             },
             err:{
             }
